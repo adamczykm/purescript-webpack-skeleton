@@ -25,8 +25,8 @@ Which is equivalent to these commands:
 
 1. automatic incremental purescript builds
 
-    $ fswatch -o src -r | xargs -n 1 -I {} pulp build
+       $ fswatch -o src -r | xargs -n 1 -I {} pulp build
 
 2. automatic js bundling
 
-    $ ./node_modules/webpack/bin/webpack.js --watch 
+       $ ./node_modules/webpack/bin/webpack.js --watch 
