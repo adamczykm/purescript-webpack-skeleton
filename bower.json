@@ -1,5 +1,5 @@
 {
-  "name": "ps-webpack-skeleton",
+  "name": "purescript-webpack-skeleton",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -8,8 +8,8 @@
   ],
   "dependencies": {
     "purescript-prelude": "^4.1.0",
-    "purescript-console": "^4.1.0",
     "purescript-effect": "^2.0.0",
+    "purescript-react-basic": "^2.0.1"
   },
   "devDependencies": {
     "purescript-psci-support": "^4.0.0"

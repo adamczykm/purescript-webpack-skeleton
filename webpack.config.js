@@ -1,8 +1,8 @@
 'use strict';
 
 const path = require('path');
-
 const webpack = require('webpack');
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 const isWebpackDevServer = process.argv.some(a => path.basename(a) === 'webpack-dev-server');
 
@@ -19,9 +19,11 @@ const plugins =
 ;
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
 
-  devtool: 'eval-source-map',
+
+  devtool: 'original-source',
+  // devtool: 'eval-source-map',
 
   devServer: {
     contentBase: '.',
@@ -29,45 +31,48 @@ module.exports = {
     stats: 'errors-only'
   },
 
-  entry: './src/Main.purs',
+  entry: './app.js',
 
   output: {
-    path: __dirname,
+    path: path.resolve(__dirname, 'dist'),
     pathinfo: true,
     filename: 'bundle.js'
   },
-
-  module: {
-    rules: [
-      {
-        test: /\.purs$/,
-        use: [
-          {
-            loader: 'purs-loader',
-            options: {
-              src: [
-                'bower_components/purescript-*/src/**/*.purs',
-                'src/**/*.purs'
-              ],
-              bundle: false,
-              psc: 'psa',
-              watch: isWebpackDevServer || isWatch,
-              pscIde: true
-            }
-          }
-        ]
-      },
-    ]
-  },
-
-  resolve: {
-    modules: [ 'node_modules', 'bower_components' ],
-    extensions: [ '.purs', '.js']
-  },
-
   plugins: [
-    new webpack.LoaderOptionsPlugin({
-      debug: false
-    })
-  ].concat(plugins)
+    new HardSourceWebpackPlugin()
+  ]
+
+  // module: {
+  //   rules: [
+  //     {
+  //       test: /\.purs$/,
+  //       use: [
+  //         {
+  //           loader: 'purs-loader',
+  //           options: {
+  //             src: [
+  //               'bower_components/purescript-*/src/**/*.purs',
+  //               'src/**/*.purs'
+  //             ],
+  //             bundle: false,
+  //             psc: 'psa',
+  //             watch: isWebpackDevServer || isWatch,
+  //             pscIde: true
+  //           }
+  //         }
+  //       ]
+  //     },
+  //   ]
+  // },
+
+  // resolve: {
+  //   modules: [ 'node_modules', 'bower_components' ],
+  //   extensions: [ '.purs', '.js']
+  // },
+
+  // plugins: [
+  //   new webpack.LoaderOptionsPlugin({
+  //     debug: false
+  //   })
+  // ].concat(plugins)
 };

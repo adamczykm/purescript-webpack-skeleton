@@ -1,9 +1,11 @@
 module Main where
 
 import Prelude
-import Effect (Effect)
-import Effect.Console (log)
 
-main :: Effect Unit
-main = do
-  log "Hello uperon sailor!"
+import Container as Container
+import Effect (Effect)
+import React.Basic (Component)
+
+
+main :: Effect (Component {})
+main = pure $ Container.component
