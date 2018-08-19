@@ -1,0 +1,27 @@
+{
+  "name": "ps-webpack-skeleton",
+  "version": "0.1.0",
+  "description": "Simple skeleton for setting up projects with purescript and webpack",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webpack": "DEBUG=purs-loader* DEBUG_DEPTH=100 ./node_modules/webpack/bin/webpack.js --progress --bail",
+    "webpack:watch": "PATH=$PATH:../releases/psc-package DEBUG=purs-loader* DEBUG_DEPTH=100 webpack --progress --display-error-details --display verbose --watch",
+    "webpack:server": "webpack-dev-server --progress --inline --hot",
+    "webpack:server:debug": "DEBUG=purs-loader* DEBUG_DEPTH=100 webpack-dev-server --progress --inline --hot",
+    "purs:compile": "purs compile 'bower_components/purescript-*/src/**/*.purs' 'src/**/*.purs'",
+    "purs:bundle": "purs bundle output/**/*.js",
+    "start": "node bundle.js"
+  },
+  "author": "Michał Adamczyk <michal.anks@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "purescript-psa": "^0.7.2",
+    "purs-loader": "^3.2.0",
+    "webpack": "^4.16.5",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.5"
+  }
+}
