@@ -5,6 +5,7 @@ import Prelude
 import React.Basic as React
 import React.Basic.DOM as R
 import React.Basic.Events as Events
+import Effect.Console (log)
 
 type Props =
   { label :: String
@@ -17,8 +18,7 @@ component = React.component { displayName: "ToggleButton", initialState, receive
       { on: false
       }
 
-    receiveProps _ =
-      pure unit
+    receiveProps _ = log "toggle button rec props"
 
     render { props, state, setState } =
       R.button
