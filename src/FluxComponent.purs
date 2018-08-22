@@ -10,13 +10,14 @@ import Data.Array (length, snoc)
 import Data.Function (const, flip, ($))
 import Data.Functor (class Functor, map)
 import Data.Identity (Identity)
+import Data.Maybe (Maybe(..), maybe)
 import Data.NaturalTransformation (type (~>))
 import Data.Newtype (unwrap)
 import Data.Semiring ((+))
 import Data.Show (show)
 import Data.Symbol (SProxy(..))
 import Data.Traversable (sequence, traverse_)
-import Data.Unit (Unit)
+import Data.Unit (Unit, unit)
 import Effect (Effect)
 import Effect.Console as EC
 import Effect.Ref (Ref, modify, modify_, new, read)
@@ -24,6 +25,7 @@ import Effect.Unsafe (unsafePerformEffect)
 import React.Basic (Component, ComponentInstance, JSX, component, element, fragment)
 import Record (insert)
 
+foreign import forceUpdate ∷ ComponentInstance → Effect Unit
 
 --- temp
 type LogRecord = {msg ∷ String}
@@ -57,16 +59,18 @@ instance monadAppMonad ∷ Monad e ⇒ Monad (AppMonad e)
 -- The application config context
 type AppReader a = Reader AppRecord a
 
+type StoreListener = (StoreState → StoreState → Maybe ComponentInstance)
+
 -- Read-only global state of the application
 type AppRecord = {
   storeState ∷ Ref StoreState,
-  storeChangeSubscriptions ∷ Ref (Array (StoreState → StoreState → Effect Unit)),
+  storeChangeSubscriptions ∷ Ref (Array StoreListener),
   updateStoreState
-    ∷ Ref (Array (StoreState → StoreState → Effect Unit))
+    ∷ Ref (Array StoreListener)
     → Ref StoreState
     → Action
     → Effect Unit,
-  subscribeToStateChange ∷ Ref (Array (StoreState → StoreState → Effect Unit)) → (StoreState → StoreState → Boolean) → Effect Unit → Effect Unit
+  subscribeToStateChange ∷ Ref (Array StoreListener) → StoreListener → Effect Unit
 }
 
 type StoreState = {i ∷ Int}
@@ -104,14 +108,12 @@ rootComponent runE (AppMonad cmp) = initialAppRecord >>= runE <<< runReaderT cmp
         subscribeToStateChange
       }
 
-    subscribeToStateChange ∷ Ref (Array (StoreState → StoreState → Effect Unit)) → (StoreState → StoreState → Boolean) → Effect Unit → Effect Unit
-    subscribeToStateChange subsRef storeDiff forceUpdate = do
-      let forceUpdateOnSubscribedChange old new = when (storeDiff old new) forceUpdate
-      modify_ (flip snoc forceUpdateOnSubscribedChange) subsRef
+    subscribeToStateChange ∷ Ref (Array StoreListener) → StoreListener → Effect Unit
+    subscribeToStateChange subsRef listener = modify_ (flip snoc listener) subsRef
 
 
     updateStoreState
-      ∷ Ref (Array (StoreState → StoreState → Effect Unit))
+      ∷ Ref (Array StoreListener)
       → Ref StoreState
       → Action
       → Effect Unit
@@ -119,7 +121,7 @@ rootComponent runE (AppMonad cmp) = initialAppRecord >>= runE <<< runReaderT cmp
       ssOld ← read ssRef
       ssNew ← modify (reducer action) ssRef
       EC.log "Store new state: " *> read ssRef >>= EC.log <<< show
-      traverse_ (\listen → listen ssOld ssNew) =<< read listenersRef
+      traverse_ (\listener → (maybe (pure unit) forceUpdate) (listener ssOld ssNew)) =<< read listenersRef
 
 
 
@@ -156,14 +158,14 @@ fluxComponent spec = AppMonad $ do
 
   -- unpack apprecord
   appR@{ storeState
-  , storeChangeSubscriptions
-  , updateStoreState
-  , subscribeToStateChange} ← ask
+       , storeChangeSubscriptions
+       , updateStoreState
+       , subscribeToStateChange} ← ask
 
   ------------- prepare auxilliary functions
 
       -- accept "forceUpdate" function and call it when intended part of storestate changes
-  let subscribeForStoreStateChange = subscribeToStateChange storeChangeSubscriptions spec.subscribedStoreStateChange
+  let subscribeForStoreStateChange inst = subscribeToStateChange storeChangeSubscriptions (\old new → if spec.subscribedStoreStateChange old new then Just inst else Nothing)
       -- dispatch and action to perform store update, (TODO: maybe cause render loop, how to unloop)
       dispatchF     = updateStoreState storeChangeSubscriptions storeState
       -- read storestate ref
@@ -173,7 +175,7 @@ fluxComponent spec = AppMonad $ do
 
   ------------- wrap react basic component creation
       receiveProps origArgs = AppMonad $ do
-        lift $ when (origArgs.isFirstMount) $ subscribeForStoreStateChange (EC.log "force update" *> origArgs.setState (const origArgs.state))
+        lift $ when (origArgs.isFirstMount) $ subscribeForStoreStateChange origArgs.instance_
         ss ← lift $ read storeState
         let newArgs = insert (SProxy ∷ SProxy "storeState") ss
                        (insert (SProxy ∷ SProxy "dispatch") dispatchF
