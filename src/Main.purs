@@ -2,10 +2,11 @@ module Main where
 
 import Prelude
 
-import Container as Container
 import Effect (Effect)
+import Example1 (simpleTester1)
+import FluxComponent (rootComponent)
 import React.Basic (Component)
 
 
 main :: Effect (Component {})
-main = pure $ Container.component
+main = rootComponent identity simpleTester1
