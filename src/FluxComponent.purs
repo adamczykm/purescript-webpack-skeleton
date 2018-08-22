@@ -141,7 +141,7 @@ fluxComponent ∷ ∀ props state e
         , dispatch ∷ Action → Effect Unit
         , log ∷ LogRecord → Effect Unit
         }
-        → AppMonad Effect Unit
+        → Effect Unit
      , render ∷
         { props ∷ { | props }
         , state ∷ { | state }
@@ -151,7 +151,7 @@ fluxComponent ∷ ∀ props state e
         , storeState ∷ StoreState
         , dispatch ∷ Action → Effect Unit
         , log ∷ LogRecord → Effect Unit
-        } → AppMonad Identity JSX
+        } → JSX
   } → AppMonad e (Component { | props })
 
 fluxComponent spec = AppMonad $ do
@@ -174,13 +174,13 @@ fluxComponent spec = AppMonad $ do
       log {msg}     = EC.log msg
 
   ------------- wrap react basic component creation
-      receiveProps origArgs = AppMonad $ do
-        lift $ when (origArgs.isFirstMount) $ subscribeForStoreStateChange origArgs.instance_
-        ss ← lift $ read storeState
+      receiveProps origArgs = do
+        when (origArgs.isFirstMount) $ subscribeForStoreStateChange origArgs.instance_
+        ss ← read storeState
         let newArgs = insert (SProxy ∷ SProxy "storeState") ss
                        (insert (SProxy ∷ SProxy "dispatch") dispatchF
                         (insert (SProxy ∷ SProxy "log") log origArgs))
-        unApp $ spec.receiveProps newArgs
+        spec.receiveProps newArgs
 
       render origArgs = unsafePerformEffect do
         ss ← read storeState
@@ -193,8 +193,8 @@ fluxComponent spec = AppMonad $ do
   pure $ component
     { displayName: spec.displayName
     , initialState: spec.initialState
-    , receiveProps: flip runReaderT appR <<< unApp <<< receiveProps
-    , render: unwrap <<< flip runReaderT appR <<< unApp <<< render }
+    , receiveProps
+    , render }
 
 createFluxElement ∷ ∀ props e
   . Monad e

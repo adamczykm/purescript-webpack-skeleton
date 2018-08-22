@@ -28,11 +28,10 @@ simpleTester1 = do
     { displayName: "simpleTester1"
     , initialState: {d:0}
     , subscribedStoreStateChange: \old new → old.i /= new.i
-    , receiveProps: \_ -> liftAction $ EC.log "recv props"
+    , receiveProps: \_ -> EC.log "recv props"
     , render: render test2 }
   where
-    render test2 {setState, state, storeState, dispatch} = dbgLog "render" $ do
-      pure $ R.div
+    render test2 {setState, state, storeState, dispatch} = R.div
         { children:
             [ R.text (show storeState.i)
             , R.text (show state.d)
@@ -48,11 +47,10 @@ simpleTester2 = fluxComponent
   { displayName: "simpleTester2"
   , initialState: {d:0}
   , subscribedStoreStateChange: \old new → old.i /= new.i
-  , receiveProps: \_ -> liftAction $ EC.log "recv props"
+  , receiveProps: \_ -> EC.log "recv props"
   , render }
   where
-    render {setState, state, storeState, dispatch} = dbgLog "render" $ pure $
-      R.div
+    render {setState, state, storeState, dispatch} = R.div
         { children:
             [ R.text (show storeState.i)
             , R.text (show state.d)
