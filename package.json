@@ -7,8 +7,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev-osx": "fswatch -o src -r | xargs -n 1 -I {} pulp build & ./node_modules/webpack/bin/webpack.js --watch && fg",
-    "dev": "inotifywait src -r -e modify -m | xargs -n 1 -I {} pulp build & ./node_modules/webpack/bin/webpack.js --watch && fg"
+    "dev": "./node_modules/webpack/bin/webpack.js --watch",
+    "dev-nopurside-osx": "fswatch -o src -r | xargs -n 1 -I {} pulp build & ./node_modules/webpack/bin/webpack.js --watch && fg",
+    "dev-nopurside": "inotifywait src -r -e modify -m | xargs -n 1 -I {} pulp build & ./node_modules/webpack/bin/webpack.js --watch && fg"
   },
   "author": "Michał Adamczyk <michal.anks@gmail.com>",
   "license": "MIT",
