@@ -11,7 +11,8 @@
     "purescript-effect": "^2.0.0",
     "purescript-react-basic": "^2.0.1",
     "purescript-logging": "^3.0.0",
-    "purescript-sentry-raven": "adamczykm/purescript-sentry-raven#d35b4c9929ac991bc048c097e03ac898956407b5"
+    "purescript-sentry-raven": "adamczykm/purescript-sentry-raven#d35b4c9929ac991bc048c097e03ac898956407b5",
+    "purescript-transformers": "^4.1.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^4.0.0"
