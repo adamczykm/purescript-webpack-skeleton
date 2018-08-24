@@ -14,7 +14,6 @@
   "license": "MIT",
   "dependencies": {
     "purescript": "^0.12",
-    "raven-js": "^3.26.4",
     "react": "^16.4.1",
     "react-dom": "^16.2.0"
   },
