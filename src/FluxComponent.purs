@@ -1,6 +1,6 @@
 module FluxComponent where
 
-import Control.Applicative (class Applicative, apply, pure, when)
+import Control.Applicative (class Applicative, pure, when)
 import Control.Apply (class Apply, (*>))
 import Control.Bind (class Bind, bind, discard, (=<<), (>>=))
 import Control.Category ((<<<))
@@ -29,6 +29,13 @@ foreign import forceUpdate ∷ ComponentInstance → Effect Unit
 -- The application monad stack
 newtype AppMonad h e a = AppMonad (ReaderT (AppRecord h) e a)
 
+derive newtype instance functorAppMonad ∷ Functor e ⇒ Functor (AppMonad h e)
+derive newtype instance applyAppMonad ∷ Apply e ⇒ Apply (AppMonad h e)
+derive newtype instance applicativeAppMonad ∷ Applicative e ⇒ Applicative (AppMonad h e)
+derive newtype instance bindAppMonad ∷ Bind e ⇒ Bind (AppMonad h e)
+derive newtype instance monadAppMonad ∷ Monad e ⇒ Monad (AppMonad h e)
+
+
 liftAction ∷ ∀ h e. Monad e ⇒ e ~> AppMonad h e
 liftAction = AppMonad <<< lift
 
@@ -37,20 +44,6 @@ unApp ∷ ∀ h e a
   . AppMonad h e a
   → ReaderT (AppRecord h) e a
 unApp (AppMonad rt) = rt
-
-instance functorAppMonad ∷ Functor e ⇒ Functor (AppMonad h e) where
-  map f (AppMonad rt) = AppMonad (map f rt)
-
-instance applyAppMonad ∷ Apply e ⇒ Apply (AppMonad h e) where
-  apply (AppMonad f) (AppMonad rt) = AppMonad (apply f rt)
-
-instance applicativeAppMonad ∷ Applicative e ⇒ Applicative (AppMonad h e) where
-  pure = AppMonad <<< pure
-
-instance bindAppMonad ∷ Bind e ⇒ Bind (AppMonad h e) where
-  bind (AppMonad rt) f = AppMonad (rt >>= unApp <<< f)
-
-instance monadAppMonad ∷ Monad e ⇒ Monad (AppMonad h e)
 
 type StoreListener = (StoreState → StoreState → Maybe ComponentInstance)
 
