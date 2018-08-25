@@ -5,7 +5,8 @@ import Control.Apply (class Apply, (*>))
 import Control.Bind (class Bind, bind, discard, (=<<), (>>=))
 import Control.Category ((<<<))
 import Control.Monad (class Monad)
-import Control.Monad.Reader (ReaderT, ask, lift, runReaderT)
+import Control.Monad.Reader (ReaderT, ask, runReaderT)
+import Control.Monad.Trans.Class (class MonadTrans)
 import Data.Array (snoc)
 import Data.Function (flip, ($))
 import Data.Functor (class Functor, map)
@@ -34,10 +35,7 @@ derive newtype instance applyAppMonad ∷ Apply e ⇒ Apply (AppMonad h e)
 derive newtype instance applicativeAppMonad ∷ Applicative e ⇒ Applicative (AppMonad h e)
 derive newtype instance bindAppMonad ∷ Bind e ⇒ Bind (AppMonad h e)
 derive newtype instance monadAppMonad ∷ Monad e ⇒ Monad (AppMonad h e)
-
-
-liftAction ∷ ∀ h e. Monad e ⇒ e ~> AppMonad h e
-liftAction = AppMonad <<< lift
+derive newtype instance monadTransAppMonad ∷ MonadTrans (AppMonad h)
 
 -- to be hidden
 unApp ∷ ∀ h e a
